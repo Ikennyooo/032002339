@@ -14,16 +14,16 @@ from pyecharts.charts import Map
 from pyecharts.charts import Bar
 from pyecharts import options as opts
 
-# 【重要事项】声明请求的相关属性。在要进行爬取时需更新headers中的cookie方可进行爬取，不然会报错412。
-# 如中途出现412中断，可更改cookie、将表格文件另存为后（若改完后直接重启表格文件会被覆盖），调整combine函数中的页码数进行继续爬取。
+# 刚开始输入1从第一页爬取。
+# 不知为何这个headers不会跳412，如果跳412则调整headers再选择从哪页开始进行爬取（应该不会，全爬了两三次）。
 # 多做了境外输入方面的代码，如果有需要可以取出运用。
-
-cookie = input('New cookie: ')
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.27',
-    'Cookie': cookie
+    'Referer': 'http://www.nhc.gov.cn/xcs/yqtb/list_gzbd.shtml',
+    'Cookie': 'yfx_c_g_u_id_10006654=_ck22091015454118598777723981237; sVoELocvxVW0S=5DSg3AJl0Eh2sJMRS0xBrJW.qk641GDuqy0w_08ci5Ki5RdtDaxR5X6SCxJU2lUT2JAIRrk5bgMicvJNmcncBLA; insert_cookie=91349450; _gscu_2059686908=62796040qrs9mc90; _gscbrs_2059686908=1; yfx_f_l_v_t_10006654=f_t_1662795941823__r_t_1662866266927__v_t_1662876292876__r_c_1; security_session_verify=ce983d3c2eeacced2208f3cd4fc9e426; sVoELocvxVW0T=53STdBCWwGhlqqqDkt0rQtG6hvNNyjExrIU3bZflvEnBgUiy0rpSXvPhIFquw.HpHkcLWwzYGQ6eEHopJXmPiqMH7P7nL09.CikMkdGvjHqdEVKzpKiFU60R530mcGomp82jqaQL3a.guQHYmHnb8EGk9nyNGpDJtpIqUlaBaWa4wQtfM3rt96HTunysuql4i5fPS4RFVke8_drqEBZUr9U8w4Ft1xHFp8bgYNqx9XEZOpYCBVMHCFEDNKT2fB88YtHP1XwYLY6rySFRX0sxoeyl3y8i5WhmKypGqBUkoSGuy.tTEACdvFM9IJQglti.iCaRYfu4_EvP28kJ69CTWulvhNH1OSwC6nG1zr6BzkvTG'
 }
+
 home_url = 'http://www.nhc.gov.cn/xcs/yqtb/list_gzbd{}.shtml'  # 爬取页面主页网址（菜单）。
 yearNumber = ''  # 表示年份的全局字符串，在combine函数中进行变更。
 
@@ -407,42 +407,30 @@ def get_html1(home_url):
 
 def parse_html(home_url):
     # 调用请求函数，获取一级页面
+    global yearNumber
     home_url = get_html1(home_url)  # 通过方法得到html格式的页面。
     soup = BeautifulSoup(home_url, 'html.parser')
     list_name = soup.select('.list > ul > li > a')
     for item in list_name:
+        yearNumber = ''
+        for i in range(10, 14):
+            yearNumber = yearNumber + item['href'][i]
+        yearNumber = yearNumber + '年'
         href = 'http://www.nhc.gov.cn/' + item['href']
         for_each(href)  # 调用for_each对每个网页进行爬取。
         print()
 
 
-def combine(home_url):
+def combine(home_url, page_int):
     # 通过修改参数 '_?' 获得菜单各个页面的网址并传递。
-    global yearNumber
-    for i in range(1, 11):
+    for i in range(page_int, 41):
         if i == 1:
             url = home_url.format('')
         else:
             url = home_url.format('_' + str(i))
-        yearNumber = '2022年'  # 2022年数据的抓取。
-        parse_html(url)
-
-    for i in range(12, 26):
-        if i == 1:
-            url = home_url.format('')
-        else:
-            url = home_url.format('_' + str(i))
-        yearNumber = '2021年'  # 2021年数据的抓取。
-        parse_html(url)
-
-    for i in range(27, 41):
-        if i == 1:
-            url = home_url.format('')
-        else:
-            url = home_url.format('_' + str(i))
-        yearNumber = '2020年'  # 2020年数据的抓取。
         parse_html(url)
 
 
 if __name__ == '__main__':
-    combine(home_url)
+    page_int = int(input('输入你要从哪页开始爬：'))
+    combine(home_url, page_int)
