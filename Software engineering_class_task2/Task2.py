@@ -419,7 +419,7 @@ def parse_html(home_url):
 def combine(home_url):
     # 通过修改参数 '_?' 获得菜单各个页面的网址并传递。
     global yearNumber
-    for i in range(0, 11):
+    for i in range(1, 11):
         if i == 1:
             url = home_url.format('')
         else:
