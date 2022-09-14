@@ -33,7 +33,7 @@ gatList = []
 
 
 def get_pic(page_text):
-    # 处理数据、获得相应的文本、表格、柱状图、地图展示的函数
+    # 输入需要处理的html文本，处理数据、获得相应所需的文本、表格、柱状图、地图展示的函数
     # =======================================================================================================
     # 前置变量的设置
     global localList
@@ -66,7 +66,7 @@ def get_pic(page_text):
     title = yearNumber + title
 
     # =======================================================================================================
-    # 把爬下来的网页村为txt
+    # 把爬下来的网页存为txt
     folder = os.path.exists('./文本')
     if not folder:  # 判断是否存在文件夹如果不存在则创建为文件夹
         os.makedirs('./文本')  # makedirs 创建文件时如果路径不存在会创建这个路径
@@ -385,7 +385,7 @@ def get_pic(page_text):
 
 
 def for_each(url):
-    # 进行网页的爬取，将text格式页面传给get_pic进行地图绘制
+    # 输入url进行网页的爬取，将页面text格式文件传给get_pic进行地图绘制
     response = requests.get(url=url, headers=headers)
     page_text = response.text
     get_pic(page_text)
@@ -399,7 +399,7 @@ def get_html1(home_url):
 
 
 def parse_html(home_url):
-    # 调用请求函数，获取一级页面
+    # 输入主页面url，调用请求函数，获取一级页面内的标签带有的二级页面网址
     global yearNumber
     home_url = get_html1(home_url)  # 通过方法得到html格式的页面。
     soup = BeautifulSoup(home_url, 'html.parser')
@@ -411,7 +411,6 @@ def parse_html(home_url):
         yearNumber = yearNumber + '年'
         href = 'http://www.nhc.gov.cn/' + item['href']
         for_each(href)  # 调用for_each对每个网页进行爬取。
-        print()
 
 
 def combine(home_url, page_int):
